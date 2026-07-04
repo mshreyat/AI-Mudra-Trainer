@@ -1,0 +1,29 @@
+{
+  "name": "mudrasense-ai-frontend",
+  "private": true,
+  "version": "0.1.0",
+  "description": "MudraSense AI — Explainable AI-Powered Intelligent Tutoring System for Bharatanatyam Mudra Training",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "preview": "vite preview",
+    "lint": "eslint ."
+  },
+  "dependencies": {
+    "@mediapipe/tasks-vision": "^0.10.35",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
+    "react-router-dom": "^7.6.2"
+  },
+  "devDependencies": {
+    "@types/react": "^19.1.0",
+    "@types/react-dom": "^19.1.0",
+    "@vitejs/plugin-react": "^4.4.1",
+    "autoprefixer": "^10.4.21",
+    "postcss": "^8.5.3",
+    "tailwindcss": "^3.4.17",
+    "typescript": "~5.7.2",
+    "vite": "^6.3.5"
+  }
+}
