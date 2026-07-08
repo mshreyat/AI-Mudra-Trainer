@@ -13,8 +13,13 @@ import { HandGeometry } from '@/utils/geometry/handGeometry';
 import { NormalizedLandmark } from '@mediapipe/tasks-vision';
 import { useAnalytics } from '@/hooks/useAnalytics';
 import { SessionSummaryCard } from '@/components/analytics/SessionSummaryCard';
+import { useAICoach } from '@/hooks/useAICoach';
+import { AICoachCard } from '@/components/ai/AICoachCard';
 
 export default function PracticePage() {
+
+  console.log("Groq Key:", import.meta.env.VITE_GROQ_API_KEY);
+
   const mudras = getAllMudras();
   const [selectedMudra, setSelectedMudra] = useState<MudraDefinition>(mudras[0]);
   const [handGeometry, setHandGeometry] = useState<HandGeometry | null>(null);
@@ -27,6 +32,14 @@ export default function PracticePage() {
 
   const isTracking = handGeometry !== null;
   const { isSpeaking, voiceEnabled, setVoiceEnabled } = useVoiceCoach(tutorData, isTracking);
+
+  // ── AI Coach Integration (additive) ──
+  const {
+    feedback: aiFeedback,
+    loading: aiLoading,
+    error: aiError,
+    refresh: refreshAICoach,
+  } = useAICoach(tutorData, selectedMudra.name);
 
   // ── Analytics Integration (additive) ──
   const {
@@ -101,8 +114,8 @@ export default function PracticePage() {
           <div className="lg:col-span-8 flex flex-col space-y-6">
 
             {/* Camera */}
-            <CameraView 
-              onHandGeometryUpdate={handleHandGeometryUpdate} 
+            <CameraView
+              onHandGeometryUpdate={handleHandGeometryUpdate}
               onLandmarksUpdate={setLandmarks}
               tutorData={tutorData}
             />
@@ -142,9 +155,9 @@ export default function PracticePage() {
 
               {/* Reference Image */}
               <div className="mt-6 aspect-video w-full rounded-xl overflow-hidden bg-surface-800 border border-surface-700">
-                <img 
-                  src={selectedMudra.image} 
-                  alt={selectedMudra.name} 
+                <img
+                  src={selectedMudra.image}
+                  alt={selectedMudra.name}
                   className="w-full h-full object-contain"
                 />
               </div>
@@ -196,7 +209,7 @@ export default function PracticePage() {
           {/* ── Right Column: Tutor Panel ── */}
           <div className="lg:col-span-4 flex flex-col space-y-6">
             <div className="lg:sticky lg:top-24 flex flex-col space-y-6">
-              
+
               {/* Voice Controls */}
               <div className="flex justify-end">
                 <VoiceToggle enabled={voiceEnabled} onToggle={setVoiceEnabled} />
@@ -224,11 +237,19 @@ export default function PracticePage() {
                   <VoiceIndicator isSpeaking={isSpeaking} />
                 </div>
                 <CoachCard
-                coachMessage={tutorData.coachMessage}
-                suggestedCorrections={tutorData.suggestedCorrections}
-                isCorrect={tutorData.isCorrect}
-                isTracking={isTracking}
-              />
+                  coachMessage={tutorData.coachMessage}
+                  suggestedCorrections={tutorData.suggestedCorrections}
+                  isCorrect={tutorData.isCorrect}
+                  isTracking={isTracking}
+                />
+                
+                <AICoachCard
+                  feedback={aiFeedback}
+                  loading={aiLoading}
+                  error={aiError}
+                  onRefresh={refreshAICoach}
+                  isTracking={isTracking}
+                />
               </div>
 
               {/* Finish Session Button (additive) */}

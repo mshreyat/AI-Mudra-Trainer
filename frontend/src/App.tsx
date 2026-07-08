@@ -5,6 +5,7 @@ import PracticePage from "@/pages/PracticePage";
 import HistoryPage from "@/pages/HistoryPage";
 import ProgressPage from "@/pages/ProgressPage";
 import AboutPage from "@/pages/AboutPage";
+import ReviewPage from "@/pages/ReviewPage";
 import { AuthGuard } from "@/components/auth/AuthGuard";
 
 function App() {
@@ -17,6 +18,7 @@ function App() {
             <Route path="/practice" element={<PracticePage />} />
             <Route path="/history" element={<HistoryPage />} />
             <Route path="/progress" element={<ProgressPage />} />
+            <Route path="/review" element={<ReviewPage />} />
             <Route path="/about" element={<AboutPage />} />
           </Route>
         </Routes>

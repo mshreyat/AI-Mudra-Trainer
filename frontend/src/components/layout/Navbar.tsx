@@ -20,6 +20,7 @@ export const Navbar = () => {
           <Link to="/practice" className="hover:text-white transition-colors">Practice</Link>
           <Link to="/library" className="hover:text-white transition-colors">Library</Link>
           <Link to="/progress" className="hover:text-white transition-colors">Progress</Link>
+          <Link to="/review" className="hover:text-white transition-colors flex items-center gap-1">🎬 Review Performance</Link>
           <Link to="/about" className="hover:text-white transition-colors">About</Link>
         </nav>
         

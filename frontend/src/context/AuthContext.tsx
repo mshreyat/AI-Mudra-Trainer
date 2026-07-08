@@ -46,16 +46,36 @@ export const AuthProvider = ({
         return unsubscribe;
     }, []);
 
+    const handleLogin = async (): Promise<void> => {
+        await login();
+    };
+
+    const handleLoginWithEmail = async (email: string, password: string): Promise<void> => {
+        await loginWithEmail(email, password);
+    };
+
+    const handleRegisterWithEmail = async (name: string, email: string, password: string): Promise<void> => {
+        await registerWithEmail(name, email, password);
+    };
+
+    const handleResetPassword = async (email: string): Promise<void> => {
+        await resetPassword(email);
+    };
+
+    const handleLogout = async (): Promise<void> => {
+        await logout();
+    };
+
     return (
         <AuthContext.Provider
             value={{
                 user,
                 loading,
-                login,
-                loginWithEmail,
-                registerWithEmail,
-                resetPassword,
-                logout,
+                login: handleLogin,
+                loginWithEmail: handleLoginWithEmail,
+                registerWithEmail: handleRegisterWithEmail,
+                resetPassword: handleResetPassword,
+                logout: handleLogout,
             }}
         >
             {children}
