@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import { Button } from '../common/Button';
+import { UserProfile } from '../auth/UserProfile';
 
 export const Navbar = () => {
   return (
@@ -26,6 +27,7 @@ export const Navbar = () => {
           <Link to="/practice">
             <Button size="sm">Start Practice</Button>
           </Link>
+          <UserProfile />
         </div>
       </div>
     </header>

@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo } from 'react';
+import { useState, useCallback, useMemo, useEffect, useRef } from 'react';
 import { CameraView } from '@/components/camera/CameraView';
 import { ScoreCard } from '@/components/tutor/ScoreCard';
 import { FingerScore } from '@/components/tutor/FingerScore';
@@ -11,6 +11,8 @@ import { useTutor } from '@/hooks/useTutor';
 import { useVoiceCoach } from '@/hooks/useVoiceCoach';
 import { HandGeometry } from '@/utils/geometry/handGeometry';
 import { NormalizedLandmark } from '@mediapipe/tasks-vision';
+import { useAnalytics } from '@/hooks/useAnalytics';
+import { SessionSummaryCard } from '@/components/analytics/SessionSummaryCard';
 
 export default function PracticePage() {
   const mudras = getAllMudras();
@@ -25,6 +27,55 @@ export default function PracticePage() {
 
   const isTracking = handGeometry !== null;
   const { isSpeaking, voiceEnabled, setVoiceEnabled } = useVoiceCoach(tutorData, isTracking);
+
+  // ── Analytics Integration (additive) ──
+  const {
+    startSession,
+    finishSession,
+    recordScore,
+    recordMistake,
+    markCompleted,
+    isSessionActive,
+    lastCompletedSession,
+    dismissSummary,
+  } = useAnalytics();
+
+  // Start a session when the page mounts or mudra changes
+  const prevMudraRef = useRef<string | null>(null);
+  useEffect(() => {
+    if (selectedMudra.name !== prevMudraRef.current) {
+      prevMudraRef.current = selectedMudra.name;
+      startSession(selectedMudra.name);
+    }
+  }, [selectedMudra.name, startSession]);
+
+  // Record scores and mistakes as tutor data updates
+  useEffect(() => {
+    if (!isTracking || !isSessionActive) return;
+    recordScore(tutorData.smoothedScore);
+    if (tutorData.mostIncorrectFinger) {
+      recordMistake(tutorData.mostIncorrectFinger);
+    }
+  }, [tutorData.smoothedScore, tutorData.mostIncorrectFinger, isTracking, isSessionActive, recordScore, recordMistake]);
+
+  // Auto-finish when mudra is completed
+  const completionHandledRef = useRef(false);
+  useEffect(() => {
+    if (tutorData.isCompleted && !completionHandledRef.current) {
+      completionHandledRef.current = true;
+      markCompleted();
+      finishSession();
+    }
+    if (!tutorData.isCompleted) {
+      completionHandledRef.current = false;
+    }
+  }, [tutorData.isCompleted, markCompleted, finishSession]);
+
+  const handleFinishSession = useCallback(() => {
+    finishSession();
+    // Start a new session for the same mudra
+    startSession(selectedMudra.name);
+  }, [finishSession, startSession, selectedMudra.name]);
 
   // Callback for CameraView to push hand geometry up
   const handleHandGeometryUpdate = useCallback((geometry: HandGeometry | null) => {
@@ -180,11 +231,29 @@ export default function PracticePage() {
               />
               </div>
 
+              {/* Finish Session Button (additive) */}
+              {isSessionActive && (
+                <button
+                  onClick={handleFinishSession}
+                  className="w-full h-10 rounded-full bg-surface-800 text-surface-300 text-sm font-medium hover:bg-surface-700 hover:text-white transition-colors border border-surface-700 cursor-pointer"
+                >
+                  Finish Session
+                </button>
+              )}
+
             </div>
           </div>
 
         </div>
       </div>
+
+      {/* Session Summary Overlay (additive) */}
+      {lastCompletedSession && (
+        <SessionSummaryCard
+          session={lastCompletedSession}
+          onDismiss={dismissSummary}
+        />
+      )}
     </div>
   );
 }
